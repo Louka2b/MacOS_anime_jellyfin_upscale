@@ -23,6 +23,7 @@ cat << EOF > "$SCRIPT_PATH"
 JMP_DIR="\$HOME/Library/Application Support/Jellyfin Media Player"
 SHADER_DIR="\$JMP_DIR/shaders"
 CONF="\$JMP_DIR/mpv.conf"
+STATE_FILE="\$JMP_DIR/.current_mode"
 LANGUAGE="$LANG_PREF"
 
 if [ "\$LANGUAGE" = "fr" ]; then
@@ -35,6 +36,7 @@ if [ "\$LANGUAGE" = "fr" ]; then
     TXT_ERR="❌ Usage: up --max | up --ultra | up --mid | up --low | up --wipe"
     TXT_CUR="ℹ️ Mode actuel :"
     TXT_CLOSE="🛑 Application des réglages..."
+    L_SHADERS="🧩 Shaders activés :"
 else
     TXT_MAX="🌌 MAX Mode (Singularity) activated ! 🔥"
     TXT_ULTRA="🚀 ULTRA Mode (High Performance) activated ! ✨"
@@ -45,19 +47,21 @@ else
     TXT_ERR="❌ Usage: up --max | up --ultra | up --mid | up --low | up --wipe"
     TXT_CUR="ℹ️ Current mode :"
     TXT_CLOSE="🛑 Applying settings..."
+    L_SHADERS="🧩 Active Shaders:"
 fi
 
 if [ -z "\$1" ]; then
-    if [ ! -f "\$CONF" ]; then
+    if [ ! -f "\$STATE_FILE" ]; then
         echo "\$TXT_CUR ❓ None"
-    elif grep -q "Restore_CNN_VL" "\$CONF" 2>/dev/null; then
-        echo "\$TXT_CUR 🌌 MAX"
-    elif grep -q "Restore_CNN_L" "\$CONF" 2>/dev/null; then
-        echo "\$TXT_CUR 🚀 ULTRA"
-    elif grep -q "Restore_CNN_M" "\$CONF" 2>/dev/null; then
-        echo "\$TXT_CUR ❄️ MID"
     else
-        echo "\$TXT_CUR 🔋 LOW"
+        MODE_NAME=\$(cat "\$STATE_FILE")
+        case "\$MODE_NAME" in
+            MAX) echo "\$TXT_CUR 🌌 MAX" ;;
+            ULTRA) echo "\$TXT_CUR 🚀 ULTRA" ;;
+            MID) echo "\$TXT_CUR ❄️ MID" ;;
+            LOW) echo "\$TXT_CUR 🔋 LOW" ;;
+            *) echo "\$TXT_CUR ❓ None" ;;
+        esac
     fi
     exit 0
 fi
@@ -104,7 +108,15 @@ cscale=ewa_lanczossharp
 dscale=mitchell
 glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_VL.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_VL.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x4.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_M.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_M.glsl"
 IN_EOF
+    echo "MAX" > "\$STATE_FILE"
     echo "\$TXT_MAX"
+    echo "\$L_SHADERS"
+    echo "  - Clamp_Highlights"
+    echo "  - Restore_CNN_VL (Very Large)"
+    echo "  - Upscale_CNN_x2_VL (Very Large)"
+    echo "  - AutoDownscalePre (x2 & x4)"
+    echo "  - Restore_CNN_M (Medium)"
+    echo "  - Upscale_CNN_x2_M (Medium)"
 
 elif [ "\$1" = "--ultra" ]; then
     cat << IN_EOF > "\$CONF"
@@ -116,7 +128,14 @@ cscale=bilinear
 dscale=mitchell
 glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_L.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_L.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_S.glsl"
 IN_EOF
+    echo "ULTRA" > "\$STATE_FILE"
     echo "\$TXT_ULTRA"
+    echo "\$L_SHADERS"
+    echo "  - Clamp_Highlights"
+    echo "  - Restore_CNN_L (Large)"
+    echo "  - Upscale_CNN_x2_L (Large)"
+    echo "  - AutoDownscalePre (x2)"
+    echo "  - Restore_CNN_S (Small)"
 
 elif [ "\$1" = "--mid" ]; then
     cat << IN_EOF > "\$CONF"
@@ -128,7 +147,14 @@ cscale=bilinear
 dscale=mitchell
 glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_M.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_M.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x4.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_S.glsl"
 IN_EOF
+    echo "MID" > "\$STATE_FILE"
     echo "\$TXT_MID"
+    echo "\$L_SHADERS"
+    echo "  - Clamp_Highlights"
+    echo "  - Restore_CNN_M (Medium)"
+    echo "  - Upscale_CNN_x2_M (Medium)"
+    echo "  - AutoDownscalePre (x2 & x4)"
+    echo "  - Upscale_CNN_x2_S (Small)"
 
 elif [ "\$1" = "--low" ]; then
     cat << IN_EOF > "\$CONF"
@@ -137,7 +163,9 @@ vo=gpu-next
 deband=no
 glsl-shaders=""
 IN_EOF
+    echo "LOW" > "\$STATE_FILE"
     echo "\$TXT_LOW"
+    echo "\$L_SHADERS Aucun"
 fi
 
 open -a "Jellyfin Media Player" 2>/dev/null
@@ -159,7 +187,7 @@ fi
 
 echo ""
 if [ "$LANG_PREF" = "fr" ]; then
-    echo "✅ Mise à jour terminée !"
+    echo "✅ Terminé ! Utilise 'up --max' ou 'up --ultra' pour voir la liste."
 else
-    echo "✅ Update complete !"
+    echo "✅ Done! Use 'up --max' or 'up --ultra' to see the list."
 fi
