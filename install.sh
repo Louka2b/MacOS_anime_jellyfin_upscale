@@ -26,27 +26,30 @@ CONF="\$JMP_DIR/mpv.conf"
 LANGUAGE="$LANG_PREF"
 
 if [ "\$LANGUAGE" = "fr" ]; then
-    TXT_MAX="🌌 Mode MAX (Spécial Mac) activé ! 🔥"
-    TXT_MID="❄️ Mode MID activé ! 🌬️"
-    TXT_LOW="🔋 Mode LOW activé ! ⚡"
+    TXT_VHIGH="🌌 Mode V-HIGH (Singularité) activé ! 🔥"
+    TXT_HIGH="🚀 Mode HIGH (Performance) activé ! ✨"
+    TXT_MID="❄️ Mode MID (Équilibré) activé ! 🌬️"
+    TXT_LOW="🔋 Mode LOW (Désactivé) activé ! ⚡"
     TXT_WIPE="✅ Nettoyage terminé ! Ouverture de Jellyfin..."
     TXT_DOWN="⏳ Téléchargement des shaders en cours..."
-    TXT_ERR="❌ Commande inconnue. Utilisation : up --max | up --mid | up --low | up --wipe"
+    TXT_ERR="❌ Usage: up --vhigh | up --high | up --mid | up --low | up --wipe"
     TXT_CUR="ℹ️ Mode actuel :"
     TXT_CLOSE="🛑 Application des réglages..."
 else
-    TXT_MAX="🌌 MAX Mode (Mac Optimized) activated ! 🔥"
-    TXT_MID="❄️ MID Mode activated ! 🌬️"
-    TXT_LOW="🔋 LOW Mode activated ! ⚡"
+    TXT_VHIGH="🌌 V-HIGH Mode (Singularité) activated ! 🔥"
+    TXT_HIGH="🚀 HIGH Mode (Performance) activated ! ✨"
+    TXT_MID="❄️ MID Mode (Balanced) activated ! 🌬️"
+    TXT_LOW="🔋 LOW Mode (Disabled) activated ! ⚡"
     TXT_WIPE="✅ WIPE complete ! Opening Jellyfin..."
     TXT_DOWN="⏳ Downloading shaders..."
-    TXT_ERR="❌ Unknown command. Usage: up --max | up --mid | up --low | up --wipe"
+    TXT_ERR="❌ Usage: up --vhigh | up --high | up --mid | up --low | up --wipe"
     TXT_CUR="ℹ️ Current mode :"
     TXT_CLOSE="🛑 Applying settings..."
 fi
 
 if [ -z "\$1" ]; then
-    if grep -q "Restore_CNN_VL" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR 🌌 MAX"
+    if grep -q "Restore_CNN_VL" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR 🌌 V-HIGH"
+    elif grep -q "Restore_CNN_L" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR 🚀 HIGH"
     elif grep -q "Restore_CNN_M" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR ❄️ MID"
     elif grep -q "glsl-shaders=\"\"" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR 🔋 LOW"
     else echo "\$TXT_CUR ❓ None"
@@ -54,7 +57,7 @@ if [ -z "\$1" ]; then
     exit 0
 fi
 
-if [ "\$1" != "--max" ] && [ "\$1" != "--mid" ] && [ "\$1" != "--low" ] && [ "\$1" != "--wipe" ]; then
+if [ "\$1" != "--vhigh" ] && [ "\$1" != "--high" ] && [ "\$1" != "--mid" ] && [ "\$1" != "--low" ] && [ "\$1" != "--wipe" ]; then
     echo "\$TXT_ERR"
     exit 1
 fi
@@ -82,7 +85,7 @@ fi
 
 mkdir -p "\$JMP_DIR"
 
-if [ "\$1" = "--max" ]; then
+if [ "\$1" = "--vhigh" ]; then
     cat << IN_EOF > "\$CONF"
 profile=gpu-hq
 vo=gpu-next
@@ -96,7 +99,19 @@ cscale=ewa_lanczossharp
 dscale=mitchell
 glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_VL.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_VL.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x4.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_M.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_M.glsl"
 IN_EOF
-    echo "\$TXT_MAX"
+    echo "\$TXT_VHIGH"
+
+elif [ "\$1" = "--high" ]; then
+    cat << IN_EOF > "\$CONF"
+profile=gpu-hq
+vo=gpu-next
+deband=yes
+scale=ewa_lanczossharp
+cscale=bilinear
+dscale=mitchell
+glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_L.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_L.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_S.glsl"
+IN_EOF
+    echo "\$TXT_HIGH"
 
 elif [ "\$1" = "--mid" ]; then
     cat << IN_EOF > "\$CONF"
@@ -140,8 +155,8 @@ fi
 echo ""
 if [ "$LANG_PREF" = "fr" ]; then
     echo "✅ Installation terminée !"
-    echo "Redémarrez votre terminal (ou ouvrez un nouvel onglet), puis tapez 'up --mid' ou 'up --max'."
+    echo "Utilisez : up --vhigh | up --high | up --mid | up --low"
 else
     echo "✅ Installation complete !"
-    echo "Restart your terminal (or open a new tab), then type 'up --mid' or 'up --max'."
+    echo "Use: up --vhigh | up --high | up --mid | up --low"
 fi
