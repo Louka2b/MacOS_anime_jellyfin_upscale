@@ -28,7 +28,7 @@ LANGUAGE="$LANG_PREF"
 
 if [ "\$LANGUAGE" = "fr" ]; then
     TXT_MAX="🌌 Mode MAX (Singularité) activé ! 🔥"
-    TXT_ULTRA="🚀 Mode ULTRA (Performance) activé ! ✨"
+    TXT_ULTRA="🚀 Mode ULTRA (Optimisé Température V2) activé ! ✨"
     TXT_MID="❄️ Mode MID (Colorimétrie Ultra + Froid) activé ! 🌬️"
     TXT_LOW="🔋 Mode LOW (Désactivé) activé ! ⚡"
     TXT_WIPE="✅ Nettoyage terminé ! Ouverture de Jellyfin..."
@@ -39,14 +39,14 @@ if [ "\$LANGUAGE" = "fr" ]; then
     L_SHADERS="🧩 Shaders activés :"
 else
     TXT_MAX="🌌 MAX Mode (Singularity) activated ! 🔥"
-    TXT_ULTRA="🚀 ULTRA Mode (High Performance) activated ! ✨"
+    TXT_ULTRA="🚀 ULTRA Mode (Efficiency Optimized) activated ! ✨"
     TXT_MID="❄️ MID Mode (Ultra Colors + Cool) activated ! 🌬️"
     TXT_LOW="🔋 LOW Mode (Disabled) activated ! ⚡"
     TXT_WIPE="✅ WIPE complete ! Opening Jellyfin..."
     TXT_DOWN="⏳ Downloading shaders..."
     TXT_ERR="❌ Usage: up --max | up --ultra | up --mid | up --low | up --wipe"
     TXT_CUR="ℹ️ Current mode :"
-    TXT_CLOSE="🛑 Applying settings..."
+    TXT_CLOSE="Applying settings..."
     L_SHADERS="🧩 Active Shaders:"
 fi
 
@@ -99,60 +99,39 @@ if [ "\$1" = "--max" ]; then
 profile=gpu-hq
 vo=gpu-next
 deband=yes
-deband-iterations=4
-deband-threshold=48
-deband-range=24
-deband-grain=16
 scale=ewa_lanczossharp
-cscale=ewa_lanczossharp
-dscale=mitchell
 glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_VL.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_VL.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x4.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_M.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_M.glsl"
 IN_EOF
     echo "MAX" > "\$STATE_FILE"
     echo "\$TXT_MAX"
-    echo "\$L_SHADERS"
-    echo "  - Clamp_Highlights"
-    echo "  - Restore_CNN_VL (Very Large)"
-    echo "  - Upscale_CNN_x2_VL"
-    echo "  - Restore_CNN_M (Medium)"
 
 elif [ "\$1" = "--ultra" ]; then
     cat << IN_EOF > "\$CONF"
-profile=gpu-hq
+profile=fast
 vo=gpu-next
-deband=yes
-scale=ewa_lanczossharp
-cscale=bilinear
-dscale=mitchell
-glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_L.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_L.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_S.glsl"
+glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_M.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_L.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl"
 IN_EOF
     echo "ULTRA" > "\$STATE_FILE"
     echo "\$TXT_ULTRA"
     echo "\$L_SHADERS"
     echo "  - Clamp_Highlights"
-    echo "  - Restore_CNN_L (Large)"
-    echo "  - Upscale_CNN_x2_L"
+    echo "  - Restore_CNN_M (Allégé pour TCMb)"
+    echo "  - Upscale_CNN_x2_L (Garde la netteté)"
 
 elif [ "\$1" = "--mid" ]; then
     cat << IN_EOF > "\$CONF"
 profile=gpu-hq
 vo=gpu-next
-deband=yes
 scale=spline36
 glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_S.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_S.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl"
 IN_EOF
     echo "MID" > "\$STATE_FILE"
     echo "\$TXT_MID"
-    echo "\$L_SHADERS"
-    echo "  - Clamp_Highlights (Ultra Colors)"
-    echo "  - Restore_CNN_S (Léger/Froid)"
-    echo "  - Upscale_CNN_x2_S"
 
 elif [ "\$1" = "--low" ]; then
     cat << IN_EOF > "\$CONF"
 profile=gpu-hq
 vo=gpu-next
-deband=no
 glsl-shaders=""
 IN_EOF
     echo "LOW" > "\$STATE_FILE"
@@ -163,10 +142,4 @@ open -a "Jellyfin Media Player" 2>/dev/null
 EOF
 
 chmod +x "$SCRIPT_PATH"
-
-if [ -d "$HOME/.config/fish/functions" ]; then
-    echo "function up; bash $SCRIPT_PATH \$argv; end" > "$HOME/.config/fish/functions/up.fish"
-    echo "function upscale; bash $SCRIPT_PATH \$argv; end" > "$HOME/.config/fish/functions/upscale.fish"
-fi
-
-if [ -f
+echo "✅ ULTRA V2 (Medium Restore) installé !"
