@@ -48,11 +48,16 @@ else
 fi
 
 if [ -z "\$1" ]; then
-    if grep -q "Restore_CNN_VL" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR 🌌 MAX"
-    elif grep -q "Restore_CNN_L" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR 🚀 ULTRA"
-    elif grep -q "Restore_CNN_M" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR ❄️ MID"
-    elif grep -q "glsl-shaders=\"\"" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR 🔋 LOW"
-    else echo "\$TXT_CUR ❓ None"
+    if [ ! -f "\$CONF" ]; then
+        echo "\$TXT_CUR ❓ None"
+    elif grep -q "Restore_CNN_VL" "\$CONF" 2>/dev/null; then
+        echo "\$TXT_CUR 🌌 MAX"
+    elif grep -q "Restore_CNN_L" "\$CONF" 2>/dev/null; then
+        echo "\$TXT_CUR 🚀 ULTRA"
+    elif grep -q "Restore_CNN_M" "\$CONF" 2>/dev/null; then
+        echo "\$TXT_CUR ❄️ MID"
+    else
+        echo "\$TXT_CUR 🔋 LOW"
     fi
     exit 0
 fi
@@ -154,9 +159,7 @@ fi
 
 echo ""
 if [ "$LANG_PREF" = "fr" ]; then
-    echo "✅ Installation terminée !"
-    echo "Utilisez : up --max | up --ultra | up --mid | up --low"
+    echo "✅ Mise à jour terminée !"
 else
-    echo "✅ Installation complete !"
-    echo "Use: up --max | up --ultra | up --mid | up --low"
+    echo "✅ Update complete !"
 fi
