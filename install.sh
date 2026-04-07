@@ -29,7 +29,7 @@ LANGUAGE="$LANG_PREF"
 if [ "\$LANGUAGE" = "fr" ]; then
     TXT_MAX="🌌 Mode MAX (Singularité) activé ! 🔥"
     TXT_ULTRA="🚀 Mode ULTRA (Performance) activé ! ✨"
-    TXT_MID="❄️ Mode MID (Équilibré) activé ! 🌬️"
+    TXT_MID="❄️ Mode MID (Colorimétrie Ultra + Froid) activé ! 🌬️"
     TXT_LOW="🔋 Mode LOW (Désactivé) activé ! ⚡"
     TXT_WIPE="✅ Nettoyage terminé ! Ouverture de Jellyfin..."
     TXT_DOWN="⏳ Téléchargement des shaders en cours..."
@@ -40,7 +40,7 @@ if [ "\$LANGUAGE" = "fr" ]; then
 else
     TXT_MAX="🌌 MAX Mode (Singularity) activated ! 🔥"
     TXT_ULTRA="🚀 ULTRA Mode (High Performance) activated ! ✨"
-    TXT_MID="❄️ MID Mode (Balanced) activated ! 🌬️"
+    TXT_MID="❄️ MID Mode (Ultra Colors + Cool) activated ! 🌬️"
     TXT_LOW="🔋 LOW Mode (Disabled) activated ! ⚡"
     TXT_WIPE="✅ WIPE complete ! Opening Jellyfin..."
     TXT_DOWN="⏳ Downloading shaders..."
@@ -113,10 +113,8 @@ IN_EOF
     echo "\$L_SHADERS"
     echo "  - Clamp_Highlights"
     echo "  - Restore_CNN_VL (Very Large)"
-    echo "  - Upscale_CNN_x2_VL (Very Large)"
-    echo "  - AutoDownscalePre (x2 & x4)"
+    echo "  - Upscale_CNN_x2_VL"
     echo "  - Restore_CNN_M (Medium)"
-    echo "  - Upscale_CNN_x2_M (Medium)"
 
 elif [ "\$1" = "--ultra" ]; then
     cat << IN_EOF > "\$CONF"
@@ -133,9 +131,7 @@ IN_EOF
     echo "\$L_SHADERS"
     echo "  - Clamp_Highlights"
     echo "  - Restore_CNN_L (Large)"
-    echo "  - Upscale_CNN_x2_L (Large)"
-    echo "  - AutoDownscalePre (x2)"
-    echo "  - Restore_CNN_S (Small)"
+    echo "  - Upscale_CNN_x2_L"
 
 elif [ "\$1" = "--mid" ]; then
     cat << IN_EOF > "\$CONF"
@@ -143,18 +139,14 @@ profile=gpu-hq
 vo=gpu-next
 deband=yes
 scale=spline36
-cscale=bilinear
-dscale=mitchell
-glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_M.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_M.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x4.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_S.glsl"
+glsl-shaders="\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl:\$SHADER_DIR/Anime4K_Restore_CNN_S.glsl:\$SHADER_DIR/Anime4K_Upscale_CNN_x2_S.glsl:\$SHADER_DIR/Anime4K_AutoDownscalePre_x2.glsl"
 IN_EOF
     echo "MID" > "\$STATE_FILE"
     echo "\$TXT_MID"
     echo "\$L_SHADERS"
-    echo "  - Clamp_Highlights"
-    echo "  - Restore_CNN_M (Medium)"
-    echo "  - Upscale_CNN_x2_M (Medium)"
-    echo "  - AutoDownscalePre (x2 & x4)"
-    echo "  - Upscale_CNN_x2_S (Small)"
+    echo "  - Clamp_Highlights (Ultra Colors)"
+    echo "  - Restore_CNN_S (Léger/Froid)"
+    echo "  - Upscale_CNN_x2_S"
 
 elif [ "\$1" = "--low" ]; then
     cat << IN_EOF > "\$CONF"
@@ -165,7 +157,6 @@ glsl-shaders=""
 IN_EOF
     echo "LOW" > "\$STATE_FILE"
     echo "\$TXT_LOW"
-    echo "\$L_SHADERS Aucun"
 fi
 
 open -a "Jellyfin Media Player" 2>/dev/null
@@ -178,16 +169,4 @@ if [ -d "$HOME/.config/fish/functions" ]; then
     echo "function upscale; bash $SCRIPT_PATH \$argv; end" > "$HOME/.config/fish/functions/upscale.fish"
 fi
 
-if [ -f "$HOME/.zshrc" ]; then
-    sed -i '' '/alias up=/d' "$HOME/.zshrc"
-    sed -i '' '/alias upscale=/d' "$HOME/.zshrc"
-    echo "alias up=\"bash $SCRIPT_PATH\"" >> "$HOME/.zshrc"
-    echo "alias upscale=\"bash $SCRIPT_PATH\"" >> "$HOME/.zshrc"
-fi
-
-echo ""
-if [ "$LANG_PREF" = "fr" ]; then
-    echo "✅ Terminé ! Utilise 'up --max' ou 'up --ultra' pour voir la liste."
-else
-    echo "✅ Done! Use 'up --max' or 'up --ultra' to see the list."
-fi
+if [ -f
