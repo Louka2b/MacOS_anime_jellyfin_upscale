@@ -7,19 +7,17 @@ echo ""
 echo "🌍 Choose your language / Choisissez votre langue :"
 echo "1) English (EN)"
 echo "2) Français (FR)"
-read -p "> " lang_choice
+read -p "> " lang_choice < /dev/tty
 
 LANG_PREF="en"
 if [ "$lang_choice" = "2" ]; then
     LANG_PREF="fr"
 fi
 
-# Création du dossier caché pour le script
 INSTALL_DIR="$HOME/.config/jellyfin-anime4k"
 mkdir -p "$INSTALL_DIR"
 SCRIPT_PATH="$INSTALL_DIR/anime4k.sh"
 
-# Génération du script avec les traductions intégrées
 cat << EOF > "$SCRIPT_PATH"
 #!/bin/bash
 JMP_DIR="\$HOME/Library/Application Support/Jellyfin Media Player"
@@ -27,7 +25,6 @@ SHADER_DIR="\$JMP_DIR/shaders"
 CONF="\$JMP_DIR/mpv.conf"
 LANGUAGE="$LANG_PREF"
 
-# --- Translations ---
 if [ "\$LANGUAGE" = "fr" ]; then
     TXT_MAX="🌌 Mode MAX (Spécial Mac) activé ! 🔥"
     TXT_MID="❄️ Mode MID activé ! 🌬️"
@@ -48,7 +45,6 @@ else
     TXT_CLOSE="🛑 Applying settings..."
 fi
 
-# 1. Status Check
 if [ -z "\$1" ]; then
     if grep -q "Restore_CNN_VL" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR 🌌 MAX"
     elif grep -q "Restore_CNN_M" "\$CONF" 2>/dev/null; then echo "\$TXT_CUR ❄️ MID"
@@ -67,7 +63,6 @@ echo "\$TXT_CLOSE"
 killall "Jellyfin Media Player" 2>/dev/null
 sleep 1
 
-# 2. Wipe Command
 if [ "\$1" = "--wipe" ]; then
     rm -rf "\$JMP_DIR"
     rm -rf "\$HOME/Library/Caches/Jellyfin Media Player"
@@ -77,7 +72,6 @@ if [ "\$1" = "--wipe" ]; then
     exit 0
 fi
 
-# 3. Download Shaders if missing
 if [ ! -f "\$SHADER_DIR/Anime4K_Clamp_Highlights.glsl" ] && [ "\$1" != "--low" ]; then
     echo "\$TXT_DOWN"
     mkdir -p "\$SHADER_DIR"
@@ -88,7 +82,6 @@ fi
 
 mkdir -p "\$JMP_DIR"
 
-# 4. Apply Configurations
 if [ "\$1" = "--max" ]; then
     cat << IN_EOF > "\$CONF"
 profile=gpu-hq
@@ -132,14 +125,12 @@ EOF
 
 chmod +x "$SCRIPT_PATH"
 
-# Configuration des alias (ZSH et FISH)
 if [ -d "$HOME/.config/fish/functions" ]; then
     echo "function up; bash $SCRIPT_PATH \$argv; end" > "$HOME/.config/fish/functions/up.fish"
     echo "function upscale; bash $SCRIPT_PATH \$argv; end" > "$HOME/.config/fish/functions/upscale.fish"
 fi
 
 if [ -f "$HOME/.zshrc" ]; then
-    # Retire les anciens alias s'ils existent pour éviter les doublons
     sed -i '' '/alias up=/d' "$HOME/.zshrc"
     sed -i '' '/alias upscale=/d' "$HOME/.zshrc"
     echo "alias up=\"bash $SCRIPT_PATH\"" >> "$HOME/.zshrc"
@@ -149,8 +140,8 @@ fi
 echo ""
 if [ "$LANG_PREF" = "fr" ]; then
     echo "✅ Installation terminée !"
-    echo "Redémarrez votre terminal, puis tapez 'up --mid' ou 'up --max'."
+    echo "Redémarrez votre terminal (ou ouvrez un nouvel onglet), puis tapez 'up --mid' ou 'up --max'."
 else
     echo "✅ Installation complete !"
-    echo "Restart your terminal, then type 'up --mid' or 'up --max'."
+    echo "Restart your terminal (or open a new tab), then type 'up --mid' or 'up --max'."
 fi
